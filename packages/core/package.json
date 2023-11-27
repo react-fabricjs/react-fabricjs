@@ -1,0 +1,31 @@
+{
+	"name": "@react-fabricjs/core",
+	"version": "0.0.0",
+	"private": true,
+	"description": "A React component to fabricjs (core)",
+	"main": "./src/index.ts",
+	"types": "./.tsbuild/index.d.ts",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/react-fabricjs/react-fabricjs.git"
+	},
+	"author": {
+		"name": "horizon0514",
+		"url": "https://github.com/horizon0514"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/react-fabricjs/react-fabricjs/issues"
+	},
+	"homepage": "https://github.com/react-fabricjs/react-fabricjs#readme",
+	"engines": {
+		"npm": ">=7.0.0"
+	},
+	"packageManager": "yarn@3.5.0",
+	"dependencies": {
+		"eventemitter3": "^4.0.7"
+	}
+}
