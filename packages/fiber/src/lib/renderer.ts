@@ -3,6 +3,8 @@ import Reconciler from 'react-reconciler'
 import { DefaultEventPriority } from 'react-reconciler/constants'
 import { DiffSet, is } from './utils'
 
+export type Root = { fiber: Reconciler.FiberRoot }
+
 interface HostConfig {
 	type: string
 	props: InstanceProps
@@ -41,7 +43,8 @@ const extend = (objects: object): void => void Object.assign(catalogue, objects)
 
 function createRenderer() {
 	function createInstance(type: string, { args, ...props }: InstanceProps, root: any) {
-		let name = `${type[0].toUpperCase()}${type.slice(1)}`
+		let fabricType = type.split('-')[1]
+		let name = `${fabricType[0].toUpperCase()}${fabricType.slice(1)}`
 		let instance: Instance
 
 		const target = catalogue[name]

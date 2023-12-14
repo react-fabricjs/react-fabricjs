@@ -1,16 +1,30 @@
 import { ReactNode } from 'react'
 import { ConcurrentRoot } from 'react-reconciler/constants'
-import { createRenderer, extend } from './renderer'
+import { Root, createRenderer, extend } from './renderer'
 
-const roots = new Map<any, any>()
+type Canvas = HTMLCanvasElement | OffscreenCanvas
+
+const roots = new Map<Canvas, Root>()
 const { reconciler } = createRenderer()
 
-export type ReconcilerRoot<TCanvas extends any> = {
-	configure: (config?: any) => ReconcilerRoot<TCanvas>
+export type Size = {
+	width: number
+	height: number
+	top: number
+	left: number
+}
+export type RenderProps<TCanvas extends Canvas> = {
+	size?: Size
+	/** Callback after the canvas has rendered (but not yet committed) */
+	onCreated?: () => void
+}
+
+export type ReconcilerRoot<TCanvas extends Canvas> = {
+	configure: (config?: RenderProps<TCanvas>) => ReconcilerRoot<TCanvas>
 	render: (element: React.ReactNode) => any
 	unmount: () => void
 }
-function createRoot(canvas: any) {
+function createRoot<TCanvas extends Canvas>(canvas: TCanvas): ReconcilerRoot<TCanvas> {
 	// check against mistaken use of createRoot
 	const prevRoot = roots.get(canvas)
 	const prevFiber = prevRoot?.fiber
@@ -32,12 +46,30 @@ function createRoot(canvas: any) {
 	if (!prevRoot) roots.set(canvas, { fiber })
 
 	return {
-		configure: () => {},
+		configure(config?: RenderProps<TCanvas>) {
+			return this
+		},
 		render(children: ReactNode) {
 			reconciler.updateContainer(children, fiber, null, () => undefined)
 		},
-		unmount() {},
+		unmount() {
+			unmountComponentAtNode(canvas)
+		},
 	}
 }
 
-export { createRoot, extend, reconciler }
+function unmountComponentAtNode<TCanvas extends Canvas>(
+	canvas: TCanvas,
+	callback?: (canvas: TCanvas) => void
+) {
+	const root = roots.get(canvas)
+	const fiber = root?.fiber
+	if (fiber) {
+		reconciler.updateContainer(null, fiber, null, () => {
+			roots.delete(canvas)
+			if (callback) callback(canvas)
+		})
+	}
+}
+
+export { createRoot, extend, reconciler, unmountComponentAtNode }

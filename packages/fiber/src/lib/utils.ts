@@ -1,3 +1,5 @@
+import React from 'react'
+
 export type DiffSet = {
 	memoized: { [key: string]: any }
 	changes: [key: string, value: unknown, isEvent: boolean, keys: string[]][]
@@ -58,4 +60,32 @@ export const is = {
 		}
 		return true
 	},
+}
+
+export type SetBlock = false | Promise<null> | null
+export type UnblockProps = {
+	set: React.Dispatch<React.SetStateAction<SetBlock>>
+	children: React.ReactNode
+}
+
+export function Block({ set }: Omit<UnblockProps, 'children'>) {
+	React.useLayoutEffect(() => {
+		set(new Promise(() => null))
+		return () => set(false)
+	}, [set])
+	return null
+}
+
+export class ErrorBoundary extends React.Component<
+	{ set: React.Dispatch<Error | undefined>; children: React.ReactNode },
+	{ error: boolean }
+> {
+	state = { error: false }
+	static getDerivedStateFromError = () => ({ error: true })
+	componentDidCatch(err: Error) {
+		this.props.set(err)
+	}
+	render() {
+		return this.state.error ? null : this.props.children
+	}
 }
