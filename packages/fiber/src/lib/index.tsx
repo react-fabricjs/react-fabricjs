@@ -1,18 +1,14 @@
+import { fabric } from 'fabric'
 import { ReactNode } from 'react'
 import { ConcurrentRoot } from 'react-reconciler/constants'
 import { Root, createRenderer, extend } from './renderer'
+import { Size, createStore } from './store'
 
-type Canvas = HTMLCanvasElement | OffscreenCanvas
+type Canvas = HTMLCanvasElement
 
 const roots = new Map<Canvas, Root>()
 const { reconciler } = createRenderer()
 
-export type Size = {
-	width: number
-	height: number
-	top: number
-	left: number
-}
 export type RenderProps<TCanvas extends Canvas> = {
 	size?: Size
 	/** Callback after the canvas has rendered (but not yet committed) */
@@ -28,6 +24,7 @@ function createRoot<TCanvas extends Canvas>(canvas: TCanvas): ReconcilerRoot<TCa
 	// check against mistaken use of createRoot
 	const prevRoot = roots.get(canvas)
 	const prevFiber = prevRoot?.fiber
+	const prevStore = prevRoot?.store
 
 	if (prevRoot) console.warn(`ReactFabric.createRoot should only be called once`)
 
@@ -40,13 +37,37 @@ function createRoot<TCanvas extends Canvas>(canvas: TCanvas): ReconcilerRoot<TCa
 			: // In older browsers and test environments, fallback to console.error.
 			  console.error
 
+	// Create store
+	const store = prevStore || createStore()
+	// Create fiber
 	const fiber =
 		prevFiber ||
-		reconciler.createContainer({}, ConcurrentRoot, null, false, null, '', logRecoverableError, null)
-	if (!prevRoot) roots.set(canvas, { fiber })
+		reconciler.createContainer(
+			store,
+			ConcurrentRoot,
+			null,
+			false,
+			null,
+			'',
+			logRecoverableError,
+			null
+		)
+	if (!prevRoot) roots.set(canvas, { store, fiber })
 
 	return {
 		configure(config?: RenderProps<TCanvas>) {
+			let state = store.getState()
+
+			// Set up scene (one time only!)
+			if (!state.scene) {
+				let scene: fabric.Canvas = new fabric.Canvas(canvas, {
+					...config,
+					width: config?.size?.width,
+					height: config?.size?.height,
+				})
+
+				state.set({ scene })
+			}
 			return this
 		},
 		render(children: ReactNode) {

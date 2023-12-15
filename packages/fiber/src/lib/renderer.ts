@@ -1,14 +1,16 @@
 import { fabric as FABRIC } from 'fabric'
 import Reconciler from 'react-reconciler'
 import { DefaultEventPriority } from 'react-reconciler/constants'
+import { UseBoundStore } from 'zustand'
+import { RootState } from './store'
 import { DiffSet, is } from './utils'
 
-export type Root = { fiber: Reconciler.FiberRoot }
+export type Root = { fiber: Reconciler.FiberRoot; store: UseBoundStore<RootState> }
 
 interface HostConfig {
 	type: string
 	props: InstanceProps
-	container: any // TODO
+	container: UseBoundStore<RootState>
 	instance: Instance
 	textInstance: void
 	suspenseInstance: Instance
@@ -61,7 +63,10 @@ function createRenderer() {
 		container: HostConfig['container'],
 		child: HostConfig['instance']
 	) {
-		container.add(child)
+		console.log(container, child)
+		const scene = container.getState().scene as unknown as Instance
+
+		scene.add(child)
 	}
 
 	function appendInitialChild(
@@ -92,7 +97,9 @@ function createRenderer() {
 		container: HostConfig['container'],
 		child: HostConfig['instance']
 	) {
-		container.remove(child)
+		const scene = container.getState().scene as unknown as Instance
+
+		scene.remove(child)
 	}
 
 	const reconciler = Reconciler<
@@ -128,7 +135,9 @@ function createRenderer() {
 			beforeChild: HostConfig['instance']
 		) => {
 			if (!child || !beforeChild) return
-			container.add(child)
+			const scene = container.getState().scene as unknown as Instance
+
+			scene.add(child)
 		},
 		getRootHostContext: () => null,
 		getChildHostContext: (parentHostContext: HostConfig['hostContext']) => parentHostContext,
