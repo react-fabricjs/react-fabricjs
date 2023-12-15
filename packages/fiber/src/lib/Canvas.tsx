@@ -1,25 +1,27 @@
-import fabric from 'fabric'
+import { fabric } from 'fabric'
 import { FiberProvider, useContextBridge } from 'its-fine'
 import React from 'react'
-import { ReconcilerRoot, createRoot, unmountComponentAtNode } from './index'
+import { ReconcilerRoot, RenderProps, createRoot, unmountComponentAtNode } from './index'
 import { extend } from './renderer'
+import { RootState } from './store'
 import { Block, ErrorBoundary, SetBlock } from './utils'
 
-export interface CanvasProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface CanvasProps
+	extends Omit<RenderProps<HTMLCanvasElement>, 'options'>,
+		React.HTMLAttributes<HTMLDivElement> {
 	children: React.ReactNode
 	/** Canvas fallback content, similar to img's alt prop */
 	fallback?: React.ReactNode
-	/** Callback after the canvas has rendered (but not yet committed) */
-	onCreated?: () => void
+	options?: Omit<fabric.ICanvasOptions, 'width' | 'height'>
 }
 
 export interface Props extends CanvasProps {}
 
 const CanvasImpl = /*#__PURE__*/ React.forwardRef<HTMLCanvasElement, Props>(function Canvas(
-	{ children, fallback, style, ...props },
+	{ children, fallback, style, options, onCreated, ...props },
 	forwardedRef
 ) {
-	React.useMemo(() => extend(fabric.fabric), [])
+	React.useMemo(() => extend(fabric), [])
 
 	const Bridge = useContextBridge()
 
@@ -41,10 +43,16 @@ const CanvasImpl = /*#__PURE__*/ React.forwardRef<HTMLCanvasElement, Props>(func
 
 	React.useLayoutEffect(() => {
 		const canvas = canvasRef.current
-		if (canvas) {
+		const containerRect = containerRef.current?.getBoundingClientRect()
+		if (containerRect.width > 0 && containerRect.height > 0 && canvas) {
 			if (!root.current) root.current = createRoot<HTMLCanvasElement>(canvas)
 
-			root.current.configure()
+			root.current.configure({
+				options: { ...options, width: containerRect.width, height: containerRect.height },
+				onCreated: (state: RootState) => {
+					if (onCreated) onCreated(state)
+				},
+			})
 
 			root.current.render(
 				<Bridge>

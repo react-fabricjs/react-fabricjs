@@ -1,8 +1,9 @@
 import { fabric } from 'fabric'
-import { ReactNode } from 'react'
+import { ReactNode, useLayoutEffect } from 'react'
 import { ConcurrentRoot } from 'react-reconciler/constants'
+import { UseBoundStore } from 'zustand'
 import { Root, createRenderer, extend } from './renderer'
-import { Size, createStore } from './store'
+import { RootState, context, createStore } from './store'
 
 type Canvas = HTMLCanvasElement
 
@@ -10,9 +11,9 @@ const roots = new Map<Canvas, Root>()
 const { reconciler } = createRenderer()
 
 export type RenderProps<TCanvas extends Canvas> = {
-	size?: Size
+	options?: fabric.ICanvasOptions
 	/** Callback after the canvas has rendered (but not yet committed) */
-	onCreated?: () => void
+	onCreated?: (state: RootState) => void
 }
 
 export type ReconcilerRoot<TCanvas extends Canvas> = {
@@ -54,24 +55,37 @@ function createRoot<TCanvas extends Canvas>(canvas: TCanvas): ReconcilerRoot<TCa
 		)
 	if (!prevRoot) roots.set(canvas, { store, fiber })
 
+	// Locals
+	let onCreated: ((state: RootState) => void) | undefined
+	let configured = false
+
 	return {
-		configure(config?: RenderProps<TCanvas>) {
+		configure(config: RenderProps<TCanvas> = {}) {
+			let { onCreated: onCreatedCallback } = config
 			let state = store.getState()
 
 			// Set up scene (one time only!)
 			if (!state.scene) {
-				let scene: fabric.Canvas = new fabric.Canvas(canvas, {
-					...config,
-					width: config?.size?.width,
-					height: config?.size?.height,
-				})
+				let scene: fabric.Canvas = new fabric.Canvas(canvas, config.options)
 
 				state.set({ scene })
 			}
+
+			// Set locals
+			onCreated = onCreatedCallback
+			configured = true
 			return this
 		},
 		render(children: ReactNode) {
-			reconciler.updateContainer(children, fiber, null, () => undefined)
+			if (!configured) this.configure()
+			reconciler.updateContainer(
+				<Provider store={store} rootElement={canvas} onCreated={onCreated}>
+					{children}
+				</Provider>,
+				fiber,
+				null,
+				() => undefined
+			)
 		},
 		unmount() {
 			unmountComponentAtNode(canvas)
@@ -79,6 +93,36 @@ function createRoot<TCanvas extends Canvas>(canvas: TCanvas): ReconcilerRoot<TCa
 	}
 }
 
+function render<TCanvas extends Canvas>(
+	children: React.ReactNode,
+	canvas: TCanvas,
+	config: RenderProps<TCanvas>
+): UseBoundStore<RootState> {
+	console.warn(`RF.render is deprecated. Use createRoot and render instead.`)
+	const root = createRoot(canvas)
+	root.configure(config)
+	return root.render(children)
+}
+
+function Provider<TCanvas extends Canvas>({
+	store,
+	children,
+	onCreated,
+	rootElement,
+}: {
+	store: UseBoundStore<RootState>
+	rootElement: TCanvas
+	children: React.ReactNode
+	onCreated?: (state: RootState) => void
+}) {
+	useLayoutEffect(() => {
+		const state = store.getState()
+
+		if (onCreated) onCreated(state)
+	}, [])
+
+	return <context.Provider value={store}>{children}</context.Provider>
+}
 function unmountComponentAtNode<TCanvas extends Canvas>(
 	canvas: TCanvas,
 	callback?: (canvas: TCanvas) => void
@@ -93,4 +137,4 @@ function unmountComponentAtNode<TCanvas extends Canvas>(
 	}
 }
 
-export { createRoot, extend, reconciler, unmountComponentAtNode }
+export { createRoot, extend, reconciler, render, unmountComponentAtNode }
