@@ -1,4 +1,5 @@
 import { fabric } from 'fabric'
+import { ICircleOptions } from 'fabric/fabric-impl'
 
 export type Properties<T> = Pick<
 	T,
@@ -29,7 +30,7 @@ export type ObjectProps = ObjectNode<fabric.Object, typeof fabric.Object>
 export type CircleProps = ObjectNode<fabric.Circle, typeof fabric.Circle>
 
 export interface FabricElements {
-	'f-circle': CircleProps
+	'f-circle': ICircleOptions
 }
 
 declare global {

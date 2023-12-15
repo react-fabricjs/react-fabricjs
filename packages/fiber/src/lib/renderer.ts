@@ -28,8 +28,6 @@ export type Instance = Omit<FABRIC.Object, 'children'> & {
 
 export type InstanceProps = {
 	[key: string]: any
-} & {
-	args?: any[]
 }
 
 interface Catalogue {
@@ -42,7 +40,7 @@ export const catalogue: Catalogue = {}
 const extend = (objects: object): void => void Object.assign(catalogue, objects)
 
 function createRenderer() {
-	function createInstance(type: string, { args, ...props }: InstanceProps, root: any) {
+	function createInstance(type: string, { ...props }: InstanceProps, root: any) {
 		let fabricType = type.split('-')[1]
 		let name = `${fabricType[0].toUpperCase()}${fabricType.slice(1)}`
 		let instance: Instance
@@ -51,13 +49,10 @@ function createRenderer() {
 		if (!target) {
 			throw new Error(`ReactFabric: Unknown type ${name}!`)
 		}
-		if (!Array.isArray(args)) {
-			throw new Error(`ReactFabric: The args prop must be an array!`)
-		}
 
 		// create new object, add it to the root
 		// append memoized props with args so it;s not forgotten
-		instance = new target(props, ...args)
+		instance = new target(props)
 
 		return instance
 	}

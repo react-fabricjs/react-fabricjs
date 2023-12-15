@@ -6,8 +6,8 @@
 	"eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
 	"stylelint.validate": ["css", "scss"],
 	"editor.codeActionsOnSave": {
-		"source.fixAll": true,
-		"source.stylelint.fixAll": true
+		"source.fixAll": "explicit",
+		"source.stylelint.fixAll": "explicit"
 	},
 	"editor.tabSize": 4,
 	"editor.formatOnSave": true,
