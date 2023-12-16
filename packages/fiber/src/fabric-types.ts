@@ -18,7 +18,7 @@ export type Node<T, P> = Overwrite<Partial<T>, NodeProps<T, P>>
 
 export type ObjectNode<T, P> = Overwrite<Node<T, P>, {}>
 
-export type ObjectProps = ObjectNode<fabric.ICircleOptions, typeof fabric.Object>
+export type ObjectProps = ObjectNode<fabric.IObjectOptions, typeof fabric.Object>
 export type CircleProps = ObjectNode<fabric.ICircleOptions, typeof fabric.Circle>
 export type RectProps = ObjectNode<fabric.IRectOptions, typeof fabric.Rect>
 export type TextProps = ObjectNode<fabric.ITextOptions, typeof fabric.Text>

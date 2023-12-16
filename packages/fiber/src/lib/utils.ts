@@ -1,8 +1,58 @@
 import React from 'react'
+import { UseBoundStore } from 'zustand'
+import { Instance, InstanceProps, LocalState } from './renderer'
+import { RootState } from './store'
 
 export type DiffSet = {
 	memoized: { [key: string]: any }
 	changes: [key: string, value: unknown, isEvent: boolean, keys: string[]][]
+}
+
+export const isDiffSet = (def: any): def is DiffSet =>
+	def && !!(def as DiffSet).memoized && !!(def as DiffSet).changes
+
+export const DEFAULT = '__default'
+
+// This function prepares a set of changes to be applied to the instance
+export function diffProps(
+	instance: Instance,
+	{ children: cN, key: kN, ref: rN, ...props }: InstanceProps,
+	{ children: cP, key: kP, ref: rP, ...previous }: InstanceProps = {},
+	remove = false
+): DiffSet {
+	const entries = Object.entries(props)
+	const changes: [key: string, value: unknown, isEvent: boolean, keys: string[]][] = []
+
+	// Catch removed props, prepend them so they can be reset or removed
+	if (remove) {
+		const previousKeys = Object.keys(previous)
+		for (let i = 0; i < previousKeys.length; i++) {
+			if (!props.hasOwnProperty(previousKeys[i]))
+				entries.unshift([previousKeys[i], DEFAULT + 'remove'])
+		}
+	}
+
+	entries.forEach(([key, value]) => {
+		// When props match bail out
+		if (is.equ(value, previous[key])) return
+		// Collect handlers and bail out
+		if (/^on(Pointer|Click|DoubleClick|ContextMenu|Wheel)/.test(key))
+			return changes.push([key, value, true, []])
+		// Split dashed props
+		let entries: string[] = []
+		if (key.includes('-')) entries = key.split('-')
+		changes.push([key, value, false, entries])
+
+		// Reset pierced props
+		for (const prop in props) {
+			const value = props[prop]
+			if (prop.startsWith(`${key}-`)) changes.push([prop, value, false, prop.split('-')])
+		}
+	})
+
+	const memoized: { [key: string]: any } = { ...props }
+
+	return { memoized, changes }
 }
 
 export type EquConfig = {
@@ -88,4 +138,61 @@ export class ErrorBoundary extends React.Component<
 	render() {
 		return this.state.error ? null : this.props.children
 	}
+}
+
+// Each object in the scene carries a small LocalState descriptor
+export function prepare<T = fabric.Object>(object: T, state?: Partial<LocalState>) {
+	const instance = object as unknown as Instance
+	instance.__rf = {
+		type: '',
+		root: null as unknown as UseBoundStore<RootState>,
+		memoizedProps: {},
+		...state,
+	}
+
+	return object
+}
+
+// When changing position/dimension -related properties (left, top, scale, angle, etc.) `set` does not update position of object's borders/controls.
+function isPositionOrDimensionRelated(
+	key: string
+): key is 'left' | 'top' | 'scaleX' | 'scaleY' | 'angle' {
+	return key === 'left' || key === 'top' || key === 'scaleX' || key === 'scaleY' || key === 'angle'
+}
+
+/**
+ * Apply props to an instance
+ */
+export function applyProps(instance: Instance, data: InstanceProps | DiffSet) {
+	// Filter equals, events and reserved props
+	const localState = (instance.__rf ?? {}) as LocalState
+	const root = localState.root
+	const rootState = root?.getState?.() ?? {}
+	const { memoized, changes } = isDiffSet(data) ? data : diffProps(instance, data)
+
+	// Prepare memoized props
+	if (instance.__rf) instance.__rf.memoizedProps = memoized
+
+	for (let i = 0; i < changes.length; i++) {
+		let [key, value, isEvent, keys] = changes[i]
+
+		if (isEvent) {
+			// TODO: add event listeners
+			continue
+		} else {
+			// Apply value
+			instance.set(key as any, value)
+			if (isPositionOrDimensionRelated(key)) {
+				instance.setCoords()
+			}
+		}
+	}
+	if (changes.length > 0) {
+		rootState.scene.requestRenderAll()
+	}
+}
+
+export function updateScene(instance: Instance) {
+	// batch updates
+	instance.canvas?.requestRenderAll()
 }

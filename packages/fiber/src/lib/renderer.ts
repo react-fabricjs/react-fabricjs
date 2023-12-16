@@ -3,10 +3,16 @@ import Reconciler from 'react-reconciler'
 import { DefaultEventPriority } from 'react-reconciler/constants'
 import { UseBoundStore } from 'zustand'
 import { RootState } from './store'
-import { DiffSet, is } from './utils'
+import { DiffSet, applyProps, diffProps, is, prepare } from './utils'
 
 export type Root = { fiber: Reconciler.FiberRoot; store: UseBoundStore<RootState> }
 
+export type LocalState = {
+	type: string
+	root: UseBoundStore<RootState>
+	memoizedProps: { [key: string]: any }
+	autoRemovedBeforeAppend?: boolean
+}
 interface HostConfig {
 	type: string
 	props: InstanceProps
@@ -54,7 +60,13 @@ function createRenderer() {
 
 		// create new object, add it to the root
 		// append memoized props with args so it;s not forgotten
-		instance = new target(props)
+		instance = prepare(new target(props), {
+			type,
+			root,
+			memoizedProps: {
+				options: props,
+			},
+		})
 
 		return instance
 	}
@@ -63,17 +75,8 @@ function createRenderer() {
 		container: HostConfig['container'],
 		child: HostConfig['instance']
 	) {
-		console.log(container, child)
 		const scene = container.getState().scene as unknown as Instance
-
 		scene.add(child)
-	}
-
-	function appendInitialChild(
-		parentInstance: HostConfig['instance'],
-		child: HostConfig['instance']
-	) {
-		parentInstance.add(child)
 	}
 
 	function appendChild(parentInstance: HostConfig['instance'], child: HostConfig['instance']) {
@@ -119,8 +122,8 @@ function createRenderer() {
 	>({
 		createInstance,
 		removeChild: () => {},
-		appendChild: () => {},
-		appendInitialChild: () => {},
+		appendChild: appendChild,
+		appendInitialChild: appendChild,
 		insertBefore,
 		supportsMutation: true,
 		isPrimaryRenderer: false,
@@ -142,10 +145,29 @@ function createRenderer() {
 		getRootHostContext: () => null,
 		getChildHostContext: (parentHostContext: HostConfig['hostContext']) => parentHostContext,
 		finalizeInitialChildren: () => false,
-		prepareUpdate: () => {
+		prepareUpdate(
+			instance: HostConfig['instance'],
+			_type: HostConfig['type'],
+			oldProps: HostConfig['props'],
+			newProps: HostConfig['props']
+		) {
+			// Create a diff-set, flag if there are any changes
+			const diff = diffProps(instance, newProps, oldProps, true)
+			if (diff.changes.length) return diff
+
+			// Otherwise do not touch the instance
 			return null
 		},
-		commitUpdate: () => {},
+		commitUpdate(
+			instance: HostConfig['instance'],
+			diff: DiffSet,
+			type: HostConfig['type'],
+			_oldProps: HostConfig['props'],
+			newProps: HostConfig['props'],
+			fiber: any
+		) {
+			applyProps(instance, diff)
+		},
 		commitMount: () => {},
 		getPublicInstance: (instance: HostConfig['instance']) => instance!,
 		prepareForCommit: () => null,
