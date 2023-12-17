@@ -1,8 +1,10 @@
+import { fabric } from 'fabric'
 import React from 'react'
 import { UseBoundStore } from 'zustand'
 import { Instance, InstanceProps, LocalState } from './renderer'
 import { RootState } from './store'
 
+export type ConstructorOf<T> = new (...args: any[]) => T
 export type DiffSet = {
 	memoized: { [key: string]: any }
 	changes: [key: string, value: unknown, isEvent: boolean, keys: string[]][]
@@ -36,8 +38,7 @@ export function diffProps(
 		// When props match bail out
 		if (is.equ(value, previous[key])) return
 		// Collect handlers and bail out
-		if (/^on(Pointer|Click|DoubleClick|ContextMenu|Wheel)/.test(key))
-			return changes.push([key, value, true, []])
+		if (/^on/.test(key)) return changes.push([key, value, true, []])
 		// Split dashed props
 		let entries: string[] = []
 		if (key.includes('-')) entries = key.split('-')
@@ -173,12 +174,24 @@ export function applyProps(instance: Instance, data: InstanceProps | DiffSet) {
 	// Prepare memoized props
 	if (instance.__rf) instance.__rf.memoizedProps = memoized
 
+	const oldEventNames: string[] = []
+	const newEvents: { key: string; value: unknown }[] = []
 	for (let i = 0; i < changes.length; i++) {
 		let [key, value, isEvent, keys] = changes[i]
 
 		if (isEvent) {
-			// TODO: add event listeners
-			continue
+			const eventName = key.split('on')[1]
+			if (eventName) {
+				const event = decamelize(eventName)
+				if (value === DEFAULT + 'remove') {
+					oldEventNames.push(event)
+				} else {
+					// TODO: add event listeners
+					oldEventNames.push(event) // we need remove all the events first
+					// and then add newEvents
+					newEvents.push({ key: event, value })
+				}
+			}
 		} else {
 			// Apply value
 			instance.set(key as any, value)
@@ -187,12 +200,21 @@ export function applyProps(instance: Instance, data: InstanceProps | DiffSet) {
 			}
 		}
 	}
+	oldEventNames.forEach((key) => {
+		instance.off(key)
+	})
+	newEvents.forEach(({ key, value }) => {
+		console.log(key, value, instance)
+		instance.on(key, value as any)
+	})
 	if (changes.length > 0) {
 		rootState.scene.requestRenderAll()
 	}
 }
 
-export function updateScene(instance: Instance) {
-	// batch updates
-	instance.canvas?.requestRenderAll()
+function decamelize(string: string) {
+	const separator = ':'
+	const split = /(?=[A-Z])/
+
+	return string.split(split).join(separator).toLowerCase()
 }

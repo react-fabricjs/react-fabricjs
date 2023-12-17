@@ -48,7 +48,7 @@ export const catalogue: Catalogue = {}
 const extend = (objects: object): void => void Object.assign(catalogue, objects)
 
 function createRenderer() {
-	function createInstance(type: string, { ...props }: InstanceProps, root: any) {
+	function createInstance(type: string, { args = [], ...props }: InstanceProps, root: any) {
 		let fabricType = type.split('-')[1]
 		let name = `${fabricType[0].toUpperCase()}${fabricType.slice(1)}`
 		let instance: Instance
@@ -58,15 +58,20 @@ function createRenderer() {
 			throw new Error(`ReactFabric: Unknown type ${name}!`)
 		}
 
+		// Throw if an object or literal was passed for args
+		if (!Array.isArray(args)) throw new Error('RF: The args prop must be an array!')
+
 		// create new object, add it to the root
 		// append memoized props with args so it;s not forgotten
-		instance = prepare(new target(props), {
+		instance = prepare(new target(...args), {
 			type,
 			root,
 			memoizedProps: {
-				options: props,
+				args,
 			},
 		})
+
+		applyProps(instance, props)
 
 		return instance
 	}
@@ -103,6 +108,45 @@ function createRenderer() {
 		const scene = container.getState().scene as unknown as Instance
 
 		scene.remove(child)
+	}
+
+	function switchInstance(
+		instance: HostConfig['instance'],
+		type: HostConfig['type'],
+		newProps: HostConfig['props'],
+		fiber: Reconciler.Fiber
+	) {
+		const parent = instance.__rf?.parent
+		if (!parent) return
+
+		const newInstance = createInstance(type, newProps, instance.__rf.root)
+
+		// When args change the instance has to be re-constructed, which then
+		// forces r3f to re-parent the children and non-scene objects
+		if (instance.children) {
+			for (const child of instance.children) {
+				if (child.__rf) appendChild(newInstance, child)
+			}
+			instance.children = instance.children.filter((child) => !child.__rf)
+		}
+
+		appendChild(parent, newInstance)
+
+		// Re-bind event handlers
+		// TODO
+
+		// This evil hack switches the react-internal fiber node
+		// https://github.com/facebook/react/issues/14983
+		// https://github.com/facebook/react/pull/15021
+		;[fiber, fiber.alternate].forEach((fiber) => {
+			if (fiber !== null) {
+				fiber.stateNode = newInstance
+				if (fiber.ref) {
+					if (typeof fiber.ref === 'function') (fiber as unknown as any).ref(newInstance)
+					else (fiber.ref as Reconciler.RefObject).current = newInstance
+				}
+			}
+		})
 	}
 
 	const reconciler = Reconciler<
@@ -151,22 +195,32 @@ function createRenderer() {
 			oldProps: HostConfig['props'],
 			newProps: HostConfig['props']
 		) {
+			// This is a data object, let's extract critical information about it
+			const { args: argsNew = [], ...restNew } = newProps
+			const { args: argsOld = [], ...restOld } = oldProps
+
+			// Throw if an object or literal was passed for args
+			if (!Array.isArray(argsNew)) throw new Error('RF: the args prop must be an array!')
+
+			// If it has new props or arguments, then it needs to be re-instantiated
+			if (argsNew.some((value, index) => value !== argsOld[index])) return [true]
 			// Create a diff-set, flag if there are any changes
-			const diff = diffProps(instance, newProps, oldProps, true)
-			if (diff.changes.length) return diff
+			const diff = diffProps(instance, restNew, restOld, true)
+			if (diff.changes.length) return [false, diff]
 
 			// Otherwise do not touch the instance
 			return null
 		},
 		commitUpdate(
 			instance: HostConfig['instance'],
-			diff: DiffSet,
+			[reconstruct, diff]: [boolean, DiffSet],
 			type: HostConfig['type'],
 			_oldProps: HostConfig['props'],
 			newProps: HostConfig['props'],
 			fiber: any
 		) {
-			applyProps(instance, diff)
+			if (reconstruct) switchInstance(instance, type, newProps, fiber)
+			else applyProps(instance, diff)
 		},
 		commitMount: () => {},
 		getPublicInstance: (instance: HostConfig['instance']) => instance!,
