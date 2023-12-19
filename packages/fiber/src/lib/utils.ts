@@ -206,6 +206,19 @@ export function applyProps(instance: Instance, data: InstanceProps | DiffSet) {
 	newEvents.forEach(({ key, value }) => {
 		instance.on(key, value as any)
 	})
+	// if instance is fabric-image, then we need to request render
+	if (instance instanceof fabric.Image) {
+		const element = instance.getElement()
+		const onload = element.onload
+
+		function patchOnload() {
+			element.onload = function (this, ev) {
+				onload?.bind(this)(ev)
+				rootState.scene.requestRenderAll()
+			}
+		}
+		patchOnload()
+	}
 	if (changes.length > 0) {
 		rootState.scene.requestRenderAll()
 	}

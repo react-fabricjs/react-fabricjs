@@ -14,6 +14,9 @@ export function Fabric() {
 	const image = new Image(100, 100)
 	image.src = 'https://pic4.zhimg.com/v2-4a7eaf6424506820f2271cff7944c89f_r.jpg'
 	image.crossOrigin = 'anonymous'
+	image.onload = () => {
+		console.log('image onload')
+	}
 
 	return (
 		<>
