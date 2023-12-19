@@ -4,6 +4,7 @@ import { ConcurrentRoot } from 'react-reconciler/constants'
 import { UseBoundStore } from 'zustand'
 import { Root, createRenderer, extend } from './renderer'
 import { RootState, context, createStore } from './store'
+import { decamelize } from './utils'
 
 type Canvas = HTMLCanvasElement
 
@@ -12,6 +13,7 @@ const { reconciler } = createRenderer()
 
 export type RenderProps<TCanvas extends Canvas> = {
 	options?: fabric.ICanvasOptions
+	events?: CanvasEventListener
 	/** Callback after the canvas has rendered (but not yet committed) */
 	onCreated?: (state: RootState) => void
 }
@@ -61,7 +63,7 @@ function createRoot<TCanvas extends Canvas>(canvas: TCanvas): ReconcilerRoot<TCa
 
 	return {
 		configure(config: RenderProps<TCanvas> = {}) {
-			let { onCreated: onCreatedCallback } = config
+			let { onCreated: onCreatedCallback, events } = config
 			let state = store.getState()
 
 			// Set up scene (one time only!)
@@ -69,6 +71,19 @@ function createRoot<TCanvas extends Canvas>(canvas: TCanvas): ReconcilerRoot<TCa
 				let scene: fabric.Canvas = new fabric.Canvas(canvas, config.options)
 
 				state.set({ scene })
+			}
+
+			if (events) {
+				// Add event listeners
+				const scene = state.get().scene
+				for (const [key, value] of Object.entries(events)) {
+					const eventName = decamelize(key.split('on')[1])
+					if (eventName === 'mouse:wheel') {
+						scene.on(eventName, value)
+					} else {
+						scene.on(eventName as fabric.EventName, value)
+					}
+				}
 			}
 
 			// Set locals

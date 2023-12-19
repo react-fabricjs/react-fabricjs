@@ -33,32 +33,50 @@ export type LineProps = ObjectNode<fabric.Line, typeof fabric.Line>
 export type TextBoxProps = ObjectNode<fabric.Textbox, typeof fabric.Textbox>
 
 export interface FabricElements {
-	'f-circle': CircleProps
-	'f-object': ObjectProps
-	'f-rect': RectProps
-	'f-text': TextProps
-	'f-image': ImageProps
-	'f-path': PathProps
-	'f-group': GroupProps
-	'f-ellipse': EllipseProps
-	'f-line': LineProps
-	'f-textbox': TextBoxProps
+	'f-circle': CircleProps & ObjectEventListener
+	'f-object': ObjectProps & ObjectEventListener
+	'f-rect': RectProps & ObjectEventListener
+	'f-text': TextProps & ObjectEventListener & TextEventListener
+	'f-image': ImageProps & ObjectEventListener
+	'f-path': PathProps & ObjectEventListener
+	'f-group': GroupProps & ObjectEventListener
+	'f-ellipse': EllipseProps & ObjectEventListener
+	'f-line': LineProps & ObjectEventListener
+	'f-textbox': TextBoxProps & ObjectEventListener & TextEventListener
 }
 
 declare global {
 	namespace JSX {
 		interface IntrinsicElements extends FabricElements {}
 	}
+
+	type CanvasEventListener = {
+		[K in CanvasEventsType]?: (e: fabric.IEvent<MouseEvent>) => void
+	} & {
+		onMouseWheel?: (e: fabric.IEvent<WheelEvent>) => void
+	}
+}
+
+type ObjectEventType = `on${Capitalize<ObjectEvents>}`
+type CanvasEventsType = `on${Capitalize<CanvasEvents>}`
+type TextEventsType = `on${Capitalize<TextEvents>}`
+
+type ObjectEventListener = {
+	[K in ObjectEventType]?: (e: fabric.IEvent<MouseEvent>) => void
+}
+
+type TextEventListener = {
+	[K in TextEventsType]?: (e: fabric.IEvent<MouseEvent>) => void
 }
 
 // Events https://github.com/fabricjs/fabric.js/wiki/Working-with-events
 type ObjectEvents =
 	| 'added'
 	| 'removed'
-	| 'mousedown'
-	| 'mouseup'
-	| 'mouseover'
-	| 'mouseout'
+	| 'mouseDown'
+	| 'mouseUp'
+	| 'mouseOver'
+	| 'mouseOut'
 	| 'modified'
 	| 'moving'
 	| 'scaling'
@@ -73,33 +91,33 @@ type TextEvents =
 	| 'editingExited'
 	| 'electionChanged'
 	| 'changed'
-	| 'dblclick'
-	| 'tripleclick'
+	| 'dblClick'
+	| 'tripleClick'
 
 type CanvasEvents =
-	| 'after:render'
-	| 'before:render'
-	| 'canvas:cleared'
-	| 'mouse:over'
-	| 'mouse:out'
-	| 'mouse:down'
-	| 'mouse:up'
-	| 'mouse:move'
-	| 'mouse:wheel'
-	| 'object:added'
-	| 'object:modified'
-	| 'object:moving'
-	| 'object:over'
-	| 'object:out'
-	| 'object:removed'
-	| 'object:rotating'
-	| 'object:scaling'
-	| 'object:selected'
-	| 'path:created'
-	| 'before:selection:cleared'
-	| 'selection:cleared'
-	| 'selection:created'
-	| 'text:editing:entered'
-	| 'text:editing:exited'
-	| 'text:selection:changed'
-	| 'text:changed'
+	| 'afterRender'
+	| 'beforeRender'
+	| 'canvasCleared'
+	| 'mouseOver'
+	| 'mouseOut'
+	| 'mouseDown'
+	| 'mouseUp'
+	| 'mouseMove'
+	| 'mouseWheel'
+	| 'objectAdded'
+	| 'objectModified'
+	| 'objectMoving'
+	| 'objectOver'
+	| 'objectOut'
+	| 'objectRemoved'
+	| 'objectRotating'
+	| 'objectScaling'
+	| 'objectSelected'
+	| 'pathCreated'
+	| 'beforeSelectionCleared'
+	| 'selectionCleared'
+	| 'selectionCreated'
+	| 'textEditingEntered'
+	| 'textEditingExited'
+	| 'textEelectionChanged'
+	| 'textChanged'

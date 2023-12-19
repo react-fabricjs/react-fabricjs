@@ -13,12 +13,14 @@ export interface CanvasProps
 	/** Canvas fallback content, similar to img's alt prop */
 	fallback?: React.ReactNode
 	options?: Omit<fabric.ICanvasOptions, 'width' | 'height'>
+	/* fabric.Canvas event listeners */
+	events?: CanvasEventListener
 }
 
 export interface Props extends CanvasProps {}
 
 const CanvasImpl = /*#__PURE__*/ React.forwardRef<HTMLCanvasElement, Props>(function Canvas(
-	{ children, fallback, style, options, onCreated, ...props },
+	{ children, fallback, style, options, onCreated, events, ...props },
 	forwardedRef
 ) {
 	React.useMemo(() => extend(fabric), [])
@@ -48,6 +50,7 @@ const CanvasImpl = /*#__PURE__*/ React.forwardRef<HTMLCanvasElement, Props>(func
 			if (!root.current) root.current = createRoot<HTMLCanvasElement>(canvas)
 
 			root.current.configure({
+				events: events,
 				options: { ...options, width: containerRect.width, height: containerRect.height },
 				onCreated: (state: RootState) => {
 					if (onCreated) onCreated(state)

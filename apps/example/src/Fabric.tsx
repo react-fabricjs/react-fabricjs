@@ -17,7 +17,14 @@ export function Fabric() {
 
 	return (
 		<>
-			<Canvas options={{ fill: 'red', selection: true }}>
+			<Canvas
+				options={{ fill: 'red', selection: true }}
+				events={{
+					onMouseDown: (e) => {
+						console.log('canvas onMouseDown', e)
+					},
+				}}
+			>
 				<f-circle
 					width={100}
 					height={100}

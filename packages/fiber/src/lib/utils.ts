@@ -204,7 +204,6 @@ export function applyProps(instance: Instance, data: InstanceProps | DiffSet) {
 		instance.off(key)
 	})
 	newEvents.forEach(({ key, value }) => {
-		console.log(key, value, instance)
 		instance.on(key, value as any)
 	})
 	if (changes.length > 0) {
@@ -212,7 +211,7 @@ export function applyProps(instance: Instance, data: InstanceProps | DiffSet) {
 	}
 }
 
-function decamelize(string: string) {
+export function decamelize(string: string) {
 	const separator = ':'
 	const split = /(?=[A-Z])/
 
