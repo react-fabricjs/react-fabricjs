@@ -94,9 +94,7 @@ function createRoot<TCanvas extends Canvas>(canvas: TCanvas): ReconcilerRoot<TCa
 		render(children: ReactNode) {
 			if (!configured) this.configure()
 			reconciler.updateContainer(
-				<Provider store={store} rootElement={canvas} onCreated={onCreated}>
-					{children}
-				</Provider>,
+				<Provider store={store} children={children} rootElement={canvas} onCreated={onCreated} />,
 				fiber,
 				null,
 				() => undefined

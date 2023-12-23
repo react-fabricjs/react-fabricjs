@@ -49,22 +49,9 @@ type ClassPropType<T> = {
 	[K in keyof T]: T[K]
 }
 
-type CircleBrushProps = ClassPropType<fabric.CircleBrush>
-type SprayBrushProps = ClassPropType<fabric.SprayBrush>
-type PatternBrushProps = ClassPropType<fabric.PatternBrush>
-type PencilBrushProps = ClassPropType<fabric.PencilBrush>
-
-export interface FabricBrush {
-	rfCircleBrush: Partial<CircleBrushProps>
-	rfSprayBrush: SprayBrushProps
-	rfPatternBrush: PatternBrushProps
-	rfPencilBrush: PencilBrushProps
-}
-
 declare global {
 	namespace JSX {
 		interface IntrinsicElements extends FabricElements {}
-		interface IntrinsicElements extends FabricBrush {}
 	}
 
 	type CanvasEventListener = {

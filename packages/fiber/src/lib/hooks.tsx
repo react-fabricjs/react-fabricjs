@@ -7,3 +7,8 @@ export function useStore() {
 		throw new Error('RF: Hooks can only be used within the Canvas/StaticCanvas component!')
 	return store
 }
+
+export function useCanvas() {
+	const store = useStore()
+	return store.getState().scene
+}

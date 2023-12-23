@@ -1,5 +1,6 @@
 import { Canvas } from '@react-fabricjs/fiber'
 import { useState } from 'react'
+import { PencilBrush } from './PencilBrush'
 
 export function Fabric() {
 	const [radius, setRadius] = useState(50)
@@ -11,6 +12,11 @@ export function Fabric() {
 		setFill(colorList[index])
 	}
 
+	const [isDrawingMode, setIsDrawingMode] = useState(false)
+	function toggleDrawingMode() {
+		setIsDrawingMode(!isDrawingMode)
+	}
+
 	const image = new Image(100, 100)
 	image.src = 'https://pic4.zhimg.com/v2-4a7eaf6424506820f2271cff7944c89f_r.jpg'
 	image.crossOrigin = 'anonymous'
@@ -19,9 +25,17 @@ export function Fabric() {
 	}
 
 	return (
-		<>
+		<div
+			style={{
+				width: '100vw',
+				height: '500px',
+			}}
+		>
 			<Canvas
-				options={{ fill: 'red', selection: true }}
+				options={{
+					fill: 'red',
+					selection: true,
+				}}
 				events={{
 					onMouseDown: (e) => {
 						console.log('canvas onMouseDown', e)
@@ -42,11 +56,13 @@ export function Fabric() {
 				<rfText width={100} height={100} args={['hello']} />
 				<rfTextbox width={100} height={100} args={['hello world']} />
 				<rfImage args={[image]} left={100} top={10} width={300} height={100} />
+				{isDrawingMode && <PencilBrush />}
 			</Canvas>
 			<div>
 				<button onClick={() => setRadius(radius + 10)}>{radius}</button>
 				<button onClick={() => changeFillColor()}>{fill}</button>
+				<button onClick={() => toggleDrawingMode()}>toggle drawing mode</button>
 			</div>
-		</>
+		</div>
 	)
 }
