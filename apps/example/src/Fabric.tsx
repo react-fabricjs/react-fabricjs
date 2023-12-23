@@ -28,7 +28,7 @@ export function Fabric() {
 					},
 				}}
 			>
-				<f-circle
+				<rfCircle
 					width={100}
 					height={100}
 					radius={radius}
@@ -38,10 +38,10 @@ export function Fabric() {
 						console.log(e)
 					}}
 				/>
-				<f-rect width={100} height={100} fill={fill} />
-				<f-text width={100} height={100} args={['hello']} />
-				<f-textbox width={100} height={100} args={['hello world']} />
-				<f-image args={[image]} left={100} top={10} width={300} height={100} />
+				<rfRect width={100} height={100} fill={fill} />
+				<rfText width={100} height={100} args={['hello']} />
+				<rfTextbox width={100} height={100} args={['hello world']} />
+				<rfImage args={[image]} left={100} top={10} width={300} height={100} />
 			</Canvas>
 			<div>
 				<button onClick={() => setRadius(radius + 10)}>{radius}</button>

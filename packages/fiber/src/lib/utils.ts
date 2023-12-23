@@ -224,8 +224,7 @@ export function applyProps(instance: Instance, data: InstanceProps | DiffSet) {
 	}
 }
 
-export function decamelize(string: string) {
-	const separator = ':'
+export function decamelize(string: string, separator: string = ':') {
 	const split = /(?=[A-Z])/
 
 	return string.split(split).join(separator).toLowerCase()

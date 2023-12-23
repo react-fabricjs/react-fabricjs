@@ -49,7 +49,7 @@ const extend = (objects: object): void => void Object.assign(catalogue, objects)
 
 function createRenderer() {
 	function createInstance(type: string, { args = [], ...props }: InstanceProps, root: any) {
-		let fabricType = type.split('-')[1]
+		let fabricType = type.split('rf')[1]
 		let name = `${fabricType[0].toUpperCase()}${fabricType.slice(1)}`
 		let instance: Instance
 

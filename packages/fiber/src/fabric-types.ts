@@ -33,21 +33,38 @@ export type LineProps = ObjectNode<fabric.Line, typeof fabric.Line>
 export type TextBoxProps = ObjectNode<fabric.Textbox, typeof fabric.Textbox>
 
 export interface FabricElements {
-	'f-circle': CircleProps & ObjectEventListener
-	'f-object': ObjectProps & ObjectEventListener
-	'f-rect': RectProps & ObjectEventListener
-	'f-text': TextProps & ObjectEventListener & TextEventListener
-	'f-image': ImageProps & ObjectEventListener
-	'f-path': PathProps & ObjectEventListener
-	'f-group': GroupProps & ObjectEventListener
-	'f-ellipse': EllipseProps & ObjectEventListener
-	'f-line': LineProps & ObjectEventListener
-	'f-textbox': TextBoxProps & ObjectEventListener & TextEventListener
+	rfCircle: CircleProps & ObjectEventListener
+	rfObject: ObjectProps & ObjectEventListener
+	rfRect: RectProps & ObjectEventListener
+	rfText: TextProps & ObjectEventListener & TextEventListener
+	rfImage: ImageProps & ObjectEventListener
+	rfPath: PathProps & ObjectEventListener
+	rfGroup: GroupProps & ObjectEventListener
+	rfEllipse: EllipseProps & ObjectEventListener
+	rfLine: LineProps & ObjectEventListener
+	rfTextbox: TextBoxProps & ObjectEventListener & TextEventListener
+}
+
+type ClassPropType<T> = {
+	[K in keyof T]: T[K]
+}
+
+type CircleBrushProps = ClassPropType<fabric.CircleBrush>
+type SprayBrushProps = ClassPropType<fabric.SprayBrush>
+type PatternBrushProps = ClassPropType<fabric.PatternBrush>
+type PencilBrushProps = ClassPropType<fabric.PencilBrush>
+
+export interface FabricBrush {
+	rfCircleBrush: Partial<CircleBrushProps>
+	rfSprayBrush: SprayBrushProps
+	rfPatternBrush: PatternBrushProps
+	rfPencilBrush: PencilBrushProps
 }
 
 declare global {
 	namespace JSX {
 		interface IntrinsicElements extends FabricElements {}
+		interface IntrinsicElements extends FabricBrush {}
 	}
 
 	type CanvasEventListener = {
