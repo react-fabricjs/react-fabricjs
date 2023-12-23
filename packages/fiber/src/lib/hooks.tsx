@@ -8,7 +8,13 @@ export function useStore() {
 	return store
 }
 
-export function useCanvas() {
+export function useRawCanvas() {
 	const store = useStore()
 	return store.getState().scene
+}
+
+export function useCanvas() {
+	const rawCanvas = useRawCanvas()
+	// attach utils to canvas
+	// TODO: add utils
 }

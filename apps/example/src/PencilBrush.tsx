@@ -1,9 +1,9 @@
-import { useCanvas } from '@react-fabricjs/fiber'
+import { useRawCanvas } from '@react-fabricjs/fiber'
 import { fabric } from 'fabric'
 import { useEffect } from 'react'
 
 export function PencilBrush() {
-	const canvas = useCanvas()
+	const canvas = useRawCanvas()
 	useEffect(() => {
 		const pencil = new fabric.PencilBrush(canvas)
 		pencil.width = 5
