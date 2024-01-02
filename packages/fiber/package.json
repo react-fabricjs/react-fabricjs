@@ -5,7 +5,9 @@
 	"main": "./src/index.ts",
 	"types": "./.tsbuild/index.d.ts",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "tsc --p ./tsconfig.build.json && vite build",
+		"build:types": "dts-bundle-generator --config ./dts-bundle-generator.config.ts"
 	},
 	"repository": {
 		"type": "git",
