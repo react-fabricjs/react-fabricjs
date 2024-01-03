@@ -5,7 +5,10 @@
 	"main": "./src/index.ts",
 	"types": "./.tsbuild/index.d.ts",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "rollup -c ../../config/rollup.config.ts",
+		"type-check": "tsc",
+		"lint": "eslint . --ext .js,.jsx,.ts,.tsx"
 	},
 	"repository": {
 		"type": "git",

@@ -5,7 +5,7 @@ module.exports = {
 		'plugin:@typescript-eslint/recommended',
 		'plugin:@next/next/core-web-vitals',
 	],
-	ignorePatterns: [],
+	ignorePatterns: ['dist'],
 	plugins: [
 		'@typescript-eslint',
 		'no-only-tests',

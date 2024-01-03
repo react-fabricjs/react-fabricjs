@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable prefer-const */
 import { fabric as FABRIC } from 'fabric'
 import Reconciler from 'react-reconciler'
 import { DefaultEventPriority } from 'react-reconciler/constants'
@@ -49,8 +51,8 @@ const extend = (objects: object): void => void Object.assign(catalogue, objects)
 
 function createRenderer() {
 	function createInstance(type: string, { args = [], ...props }: InstanceProps, root: any) {
-		let fabricType = type.split('rf')[1]
-		let name = `${fabricType[0].toUpperCase()}${fabricType.slice(1)}`
+		const fabricType = type.split('rf')[1]
+		const name = `${fabricType[0].toUpperCase()}${fabricType.slice(1)}`
 		let instance: Instance
 
 		const target = catalogue[name]
@@ -91,7 +93,7 @@ function createRenderer() {
 	function insertBefore(
 		parentInstance: HostConfig['instance'],
 		child: HostConfig['instance'],
-		beforeChild: HostConfig['instance']
+		_beforeChild: HostConfig['instance']
 	) {
 		parentInstance.add(child)
 	}
@@ -225,11 +227,11 @@ function createRenderer() {
 		commitMount: () => {},
 		getPublicInstance: (instance: HostConfig['instance']) => instance!,
 		prepareForCommit: () => null,
-		preparePortalMount: (container: HostConfig['container']) => {},
+		preparePortalMount: (_container: HostConfig['container']) => {},
 		resetAfterCommit: () => {},
 		shouldSetTextContent: () => false,
 		clearContainer: () => false,
-		hideInstance: (instance: HostConfig['instance']) => {
+		hideInstance: (_instance: HostConfig['instance']) => {
 			// Detach while the instance is hidden
 			// TODO
 		},

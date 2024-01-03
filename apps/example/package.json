@@ -8,7 +8,8 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"serve": "vite preview"
+		"serve": "vite preview",
+		"type-check": "tsc"
 	},
 	"repository": {
 		"type": "git",

@@ -1,3 +1,4 @@
+/* eslint-disable local/no-export-star */
 import * as ReactFabric from './fabric-types'
 
 export * from './fabric-types'

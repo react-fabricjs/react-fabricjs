@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable @typescript-eslint/ban-types */
 import { fabric } from 'fabric'
 
 export type Properties<T> = Pick<
@@ -43,10 +46,6 @@ export interface FabricElements {
 	rfEllipse: EllipseProps & ObjectEventListener
 	rfLine: LineProps & ObjectEventListener
 	rfTextbox: TextBoxProps & ObjectEventListener & TextEventListener
-}
-
-type ClassPropType<T> = {
-	[K in keyof T]: T[K]
 }
 
 declare global {

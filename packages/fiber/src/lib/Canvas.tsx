@@ -17,6 +17,7 @@ export interface CanvasProps
 	events?: CanvasEventListener
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props extends CanvasProps {}
 
 const CanvasImpl = /*#__PURE__*/ React.forwardRef<HTMLCanvasElement, Props>(function Canvas(
@@ -65,7 +66,7 @@ const CanvasImpl = /*#__PURE__*/ React.forwardRef<HTMLCanvasElement, Props>(func
 				</Bridge>
 			)
 		}
-	})
+	}, [children, options, events, onCreated, containerRef, canvasRef, setBlock, setError, Bridge])
 
 	React.useEffect(() => {
 		const canvas = canvasRef.current

@@ -11,7 +11,7 @@ type Canvas = HTMLCanvasElement
 const roots = new Map<Canvas, Root>()
 const { reconciler } = createRenderer()
 
-export type RenderProps<TCanvas extends Canvas> = {
+export type RenderProps<_TCanvas extends Canvas> = {
 	options?: fabric.ICanvasOptions
 	events?: CanvasEventListener
 	/** Callback after the canvas has rendered (but not yet committed) */
@@ -63,12 +63,12 @@ function createRoot<TCanvas extends Canvas>(canvas: TCanvas): ReconcilerRoot<TCa
 
 	return {
 		configure(config: RenderProps<TCanvas> = {}) {
-			let { onCreated: onCreatedCallback, events } = config
-			let state = store.getState()
+			const { onCreated: onCreatedCallback, events } = config
+			const state = store.getState()
 
 			// Set up scene (one time only!)
 			if (!state.scene) {
-				let scene: fabric.Canvas = new fabric.Canvas(canvas, config.options)
+				const scene: fabric.Canvas = new fabric.Canvas(canvas, config.options)
 
 				state.set({ scene })
 			}
@@ -121,7 +121,6 @@ function Provider<TCanvas extends Canvas>({
 	store,
 	children,
 	onCreated,
-	rootElement,
 }: {
 	store: UseBoundStore<RootState>
 	rootElement: TCanvas
@@ -132,7 +131,7 @@ function Provider<TCanvas extends Canvas>({
 		const state = store.getState()
 
 		if (onCreated) onCreated(state)
-	}, [])
+	}, [onCreated, store])
 
 	return <context.Provider value={store}>{children}</context.Provider>
 }

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-prototype-builtins */
 import { fabric } from 'fabric'
 import React from 'react'
 import { UseBoundStore } from 'zustand'
@@ -177,7 +180,7 @@ export function applyProps(instance: Instance, data: InstanceProps | DiffSet) {
 	const oldEventNames: string[] = []
 	const newEvents: { key: string; value: unknown }[] = []
 	for (let i = 0; i < changes.length; i++) {
-		let [key, value, isEvent, keys] = changes[i]
+		const [key, value, isEvent, keys] = changes[i]
 
 		if (isEvent) {
 			const eventName = key.split('on')[1]
@@ -211,6 +214,7 @@ export function applyProps(instance: Instance, data: InstanceProps | DiffSet) {
 		const element = instance.getElement()
 		const onload = element.onload
 
+		// eslint-disable-next-line no-inner-declarations
 		function patchOnload() {
 			element.onload = function (this, ev) {
 				onload?.bind(this)(ev)
@@ -224,7 +228,7 @@ export function applyProps(instance: Instance, data: InstanceProps | DiffSet) {
 	}
 }
 
-export function decamelize(string: string, separator: string = ':') {
+export function decamelize(string: string, separator = ':') {
 	const split = /(?=[A-Z])/
 
 	return string.split(split).join(separator).toLowerCase()

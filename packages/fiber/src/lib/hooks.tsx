@@ -14,7 +14,7 @@ export function useRawCanvas() {
 }
 
 export function useCanvas() {
-	const rawCanvas = useRawCanvas()
+	const _rawCanvas = useRawCanvas()
 	// attach utils to canvas
 	// TODO: add utils
 }
