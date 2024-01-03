@@ -1,0 +1,33 @@
+{
+	"eslint.format.enable": true,
+	"eslint.options": {
+		"extensions": [".js", ".ts", ".tsx", ".html"]
+	},
+	"eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+	"stylelint.validate": ["css", "scss"],
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "explicit",
+		"source.stylelint.fixAll": "explicit"
+	},
+	"editor.tabSize": 4,
+	"editor.formatOnSave": true,
+	"files.insertFinalNewline": true,
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[javasrcipt]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"emmet.includeLanguages": {
+		"postcss": "css"
+	},
+	"css.validate": false,
+	"scss.validate": false,
+	"typescript.tsdk": "node_modules/typescript/lib"
+}

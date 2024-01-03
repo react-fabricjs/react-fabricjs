@@ -1,0 +1,47 @@
+{
+	"name": "@react-fabricjs/fiber",
+	"version": "0.0.1",
+	"description": "A React component to fabricjs (react-fiber)",
+	"main": "./src/index.ts",
+	"types": "./.tsbuild/index.d.ts",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "rollup -c ../../config/rollup.config.ts",
+		"type-check": "tsc",
+		"lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/react-fabricjs/react-fabricjs.git"
+	},
+	"author": {
+		"name": "horizon0514",
+		"url": "https://github.com/horizon0514"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/react-fabricjs/react-fabricjs/issues"
+	},
+	"homepage": "https://github.com/react-fabricjs/react-fabricjs#readme",
+	"engines": {
+		"npm": ">=7.0.0"
+	},
+	"packageManager": "yarn@3.5.0",
+	"devDependencies": {
+		"@types/fabric": "^5.3.0",
+		"@types/react-reconciler": "^0.28.2",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
+	},
+	"dependencies": {
+		"its-fine": "^1.1.1",
+		"react-reconciler": "~0.29.0",
+		"scheduler": "^0.23.0",
+		"zustand": "^3.7.1"
+	},
+	"peerDependencies": {
+		"fabric": "^5.3.0",
+		"react": ">=18.0.0",
+		"react-dom": ">=18.0.0"
+	}
+}

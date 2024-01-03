@@ -1,7 +1,6 @@
 {
 	"name": "@react-fabricjs/core",
-	"version": "0.0.0",
-	"private": true,
+	"version": "0.0.1",
 	"description": "A React component to fabricjs (core)",
 	"main": "./src/index.ts",
 	"types": "./.tsbuild/index.d.ts",
@@ -26,6 +25,7 @@
 	},
 	"packageManager": "yarn@3.5.0",
 	"dependencies": {
-		"eventemitter3": "^4.0.7"
+		"eventemitter3": "^4.0.7",
+		"fabric": "^5.3.0"
 	}
 }
