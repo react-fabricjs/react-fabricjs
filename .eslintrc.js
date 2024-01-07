@@ -90,11 +90,5 @@ module.exports = {
 				'import/no-internal-modules': 'off',
 			},
 		},
-		// {
-		// 	files: ['packages/tldraw/src/test/**/*'],
-		// 	rules: {
-		// 		'import/no-internal-modules': 'off',
-		// 	},
-		// },
 	],
 }
