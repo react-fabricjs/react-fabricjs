@@ -1,0 +1,31 @@
+name: Publish
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    name: Build, and publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'yarn'
+          cache-dependency-path: 'public-yarn.lock'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Build
+        run: yarn run build
+
+      - uses: pnpm/action-setup@v2
+
+      - name: Pnpm publish
+        run: pnpm publish
